@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#c8102e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Erlach Kids">
+<title>Erlach Kids – Controle Financeiro</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#c8102e;
+  --red-dark:#9b0c22;
+  --red-light:#e8354f;
+  --red-bg:#fff0f2;
+  --red-border:#f5c0c8;
+  --gold:#f5a623;
+  --gold-bg:#fff8ee;
+  --bg:#f7f7f8;
+  --surface:#ffffff;
+  --surface2:#f2f2f4;
+  --success:#1a7a4a;
+  --success-bg:#e6f4ed;
+  --text:#1a1a1a;
+  --text2:#555;
+  --text3:#999;
+  --border:#e4e4e8;
+  --radius:14px;
+  --radius-sm:9px;
+  --shadow:0 2px 14px rgba(0,0,0,0.07);
+  --shadow-md:0 4px 24px rgba(0,0,0,0.11);
+  --font:'Nunito',sans-serif;
+  --mono:monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* LOGIN */
+#login-screen{background:linear-gradient(150deg,var(--red-dark) 0%,var(--red) 60%,var(--red-light) 100%);align-items:center;justify-content:center;padding:2rem}
+.login-box{background:#fff;border-radius:22px;padding:2.5rem 2rem;width:100%;max-width:380px;box-shadow:0 12px 48px rgba(0,0,0,0.2)}
+.login-logo{text-align:center;margin-bottom:2rem}
+.login-logo-icon{width:68px;height:68px;background:var(--red);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;box-shadow:0 6px 18px rgba(200,16,46,0.35)}
+.login-logo-icon span{font-size:1.4rem;font-weight:800;color:#fff;letter-spacing:-1px}
+.login-logo h1{font-size:1.45rem;font-weight:800;color:var(--red);letter-spacing:-0.02em}
+.login-logo p{font-size:0.75rem;color:var(--text3);margin-top:3px;text-transform:uppercase;letter-spacing:0.09em}
+.form-group{margin-bottom:1.1rem}
+.form-group label{display:block;font-size:0.72rem;font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.07em}
+.form-group input{width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.78rem 1rem;font-size:0.95rem;font-family:var(--font);color:var(--text);background:var(--bg);transition:border-color 0.2s}
+.form-group input:focus{outline:none;border-color:var(--red);background:#fff}
+.btn-primary{width:100%;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);padding:0.88rem;font-size:1rem;font-weight:700;font-family:var(--font);cursor:pointer;transition:background 0.2s,transform 0.1s;box-shadow:0 4px 14px rgba(200,16,46,0.3)}
+.btn-primary:active{transform:scale(0.98)}
+.btn-primary:hover{background:var(--red-dark)}
+.login-error{background:var(--red-bg);color:var(--red);border-radius:var(--radius-sm);padding:0.6rem 0.9rem;font-size:0.85rem;margin-bottom:1rem;display:none;font-weight:600}
+
+/* APP SHELL */
+#app-screen{background:var(--bg)}
+.topbar{background:linear-gradient(135deg,var(--red-dark) 0%,var(--red) 70%,var(--red-light) 100%);padding:1rem 1.25rem 0.85rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.15)}
+.topbar-brand{display:flex;align-items:center;gap:10px}
+.topbar-icon{width:36px;height:36px;background:rgba(255,255,255,0.18);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:800;color:#fff;border:1.5px solid rgba(255,255,255,0.25)}
+.topbar-title h2{font-size:0.98rem;font-weight:700;color:#fff}
+.topbar-title p{font-size:0.68rem;color:rgba(255,255,255,0.62);text-transform:uppercase;letter-spacing:0.07em}
+.avatar{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:700;color:#fff;cursor:pointer}
+
+/* NAV TABS */
+.nav-tabs{display:flex;background:var(--red-dark);padding:0 1rem;gap:2px}
+.nav-tab{flex:1;text-align:center;padding:0.65rem 0.3rem;font-size:0.68rem;font-weight:700;color:rgba(255,255,255,0.48);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1px;transition:all 0.2s;text-transform:uppercase;letter-spacing:0.05em}
+.nav-tab.active{color:#fff;border-bottom-color:#fff}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:1.1rem;display:flex;flex-direction:column;gap:1rem}
+
+/* MONTH HEADER */
+.month-tag{font-size:0.7rem;font-weight:700;color:var(--red);background:var(--red-bg);padding:4px 12px;border-radius:20px;border:1px solid var(--red-border);text-transform:uppercase;letter-spacing:0.06em;display:inline-block}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{background:var(--surface);border-radius:var(--radius);padding:1rem 1.1rem;box-shadow:var(--shadow);border-top:3px solid var(--border)}
+.stat-card.sc-red{border-top-color:var(--red)}
+.stat-card.sc-green{border-top-color:var(--success)}
+.stat-card.sc-gold{border-top-color:var(--gold)}
+.stat-card .s-label{font-size:0.66rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px}
+.stat-card .s-value{font-size:1.75rem;font-weight:800;letter-spacing:-0.03em;line-height:1}
+.stat-card .s-sub{font-size:0.7rem;color:var(--text3);margin-top:3px}
+.stat-card.sc-red .s-value{color:var(--red)}
+.stat-card.sc-green .s-value{color:var(--success)}
+.stat-card.sc-gold .s-value{color:var(--gold)}
+
+/* DEVE ENTRAR */
+.deve-entrar-card{background:var(--surface);border-radius:var(--radius);padding:1.1rem 1.25rem;box-shadow:var(--shadow);border-left:4px solid var(--gold)}
+.de-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.de-top span{font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3)}
+.btn-edit-saldo{background:var(--red-bg);border:1px solid var(--red-border);color:var(--red);border-radius:6px;padding:3px 10px;font-size:0.7rem;font-weight:700;cursor:pointer;font-family:var(--font)}
+.de-valor{font-size:1.55rem;font-weight:800;color:var(--gold);letter-spacing:-0.02em}
+.de-sub{font-size:0.72rem;color:var(--text3);margin-top:2px}
+.saldo-edit-row{display:none;gap:8px;margin-top:10px}
+.saldo-edit-row input{flex:1;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.55rem 0.8rem;font-size:0.92rem;font-family:var(--font)}
+.saldo-edit-row input:focus{outline:none;border-color:var(--red)}
+.btn-salvar-saldo{background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);padding:0.55rem 1rem;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:var(--font)}
+
+/* CHART */
+.chart-card{background:var(--surface);border-radius:var(--radius);padding:1.1rem 1.25rem;box-shadow:var(--shadow)}
+.chart-card h3{font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.9rem}
+.chart-wrap{position:relative;display:flex;align-items:center;justify-content:center;height:190px}
+.chart-center{position:absolute;text-align:center;pointer-events:none}
+.chart-center .pct{font-size:1.6rem;font-weight:800;color:var(--text)}
+.chart-center .lbl{font-size:0.65rem;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:0.05em}
+.chart-legend{display:flex;gap:1.25rem;justify-content:center;margin-top:10px}
+.leg-item{display:flex;align-items:center;gap:6px;font-size:0.76rem;font-weight:600;color:var(--text2)}
+.leg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* LIST CARDS */
+.list-card{background:var(--surface);border-radius:var(--radius);padding:1.1rem 1.25rem;box-shadow:var(--shadow)}
+.list-card-title{font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.85rem;display:flex;align-items:center;gap:7px}
+.bc{background:var(--red-bg);color:var(--red);border-radius:20px;padding:1px 8px;font-size:0.66rem;font-weight:700}
+.bc.green{background:var(--success-bg);color:var(--success)}
+.s-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s}
+.s-row:last-child{border-bottom:none}
+.s-row:active{background:var(--bg)}
+.s-name{font-size:0.88rem;font-weight:600;color:var(--text);line-height:1.3}
+.s-mat{font-size:0.68rem;color:var(--text3);font-family:var(--mono);margin-top:1px}
+.s-apagar{font-size:0.88rem;font-weight:700;color:var(--red)}
+.s-venc{font-size:0.66rem;color:var(--text3);margin-top:2px;text-align:right}
+.badge-ok{font-size:0.7rem;font-weight:700;color:var(--success);background:var(--success-bg);padding:2px 9px;border-radius:20px}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap}
+.filter-bar input,.filter-bar select{flex:1;min-width:100px;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.62rem 0.9rem;font-size:0.88rem;font-family:var(--font);color:var(--text);background:var(--surface)}
+.filter-bar input:focus,.filter-bar select:focus{outline:none;border-color:var(--red)}
+
+/* STUDENT CARDS (aba alunos) */
+.student-list{display:flex;flex-direction:column;gap:8px}
+.student-card{background:var(--surface);border-radius:var(--radius);padding:1rem 1.1rem;box-shadow:var(--shadow);cursor:pointer;border-left:3px solid var(--border);transition:transform 0.15s}
+.student-card:active{transform:scale(0.99)}
+.student-card.devendo{border-left-color:var(--red)}
+.student-card.em-dia{border-left-color:var(--success)}
+.student-card-header{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.student-name{font-size:0.93rem;font-weight:600;color:var(--text)}
+.student-matricula{font-size:0.7rem;font-family:var(--mono);color:var(--text3);margin-top:2px}
+.badge{display:inline-flex;padding:3px 9px;border-radius:20px;font-size:0.68rem;font-weight:700;flex-shrink:0}
+.badge.devendo{background:var(--red-bg);color:var(--red)}
+.badge.em-dia{background:var(--success-bg);color:var(--success)}
+.student-card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.student-info-sm{font-size:0.76rem;color:var(--text3)}
+.student-apagar-val{font-size:0.95rem;font-weight:700;color:var(--red);font-family:var(--mono)}
+
+/* DETAIL */
+#detail-screen{background:var(--bg)}
+.detail-header{background:linear-gradient(135deg,var(--red-dark),var(--red));padding:1rem 1.25rem;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.btn-back{background:transparent;border:none;cursor:pointer;color:#fff;padding:4px;display:flex;align-items:center}
+.btn-back svg{width:22px;height:22px}
+.detail-header-info h2{font-size:1rem;font-weight:700;color:#fff}
+.detail-header-info p{font-size:0.73rem;color:rgba(255,255,255,0.6)}
+.detail-content{padding:1.1rem;display:flex;flex-direction:column;gap:1rem}
+.info-card{background:var(--surface);border-radius:var(--radius);padding:1.1rem;box-shadow:var(--shadow)}
+.info-card h3{font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.9rem}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.info-label{font-size:0.82rem;color:var(--text2)}
+.info-value{font-size:0.88rem;font-weight:600;color:var(--text);text-align:right}
+.info-value.highlight{font-size:1.05rem;color:var(--red);font-family:var(--mono)}
+.info-value.devendo{color:var(--red)}
+.info-value.em-dia{color:var(--success)}
+
+/* WhatsApp */
+.btn-whatsapp{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:#25d366;color:#fff;border:none;border-radius:var(--radius-sm);padding:0.88rem;font-size:0.95rem;font-weight:700;font-family:var(--font);cursor:pointer;text-decoration:none}
+.btn-whatsapp svg{width:20px;height:20px;fill:#fff}
+
+/* Notas */
+.notes-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.note-item{background:var(--surface2);border-radius:var(--radius-sm);padding:0.8rem}
+.note-meta{font-size:0.68rem;color:var(--text3);margin-bottom:4px;display:flex;gap:8px}
+.note-meta strong{color:var(--red)}
+.note-text{font-size:0.87rem;color:var(--text);line-height:1.5}
+.notes-empty{font-size:0.85rem;color:var(--text3);text-align:center;padding:1rem 0}
+.note-input-row{display:flex;gap:8px}
+.note-input-row textarea{flex:1;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.6rem 0.85rem;font-size:0.87rem;font-family:var(--font);color:var(--text);resize:none;min-height:68px;background:var(--surface)}
+.note-input-row textarea:focus{outline:none;border-color:var(--red)}
+.btn-add-note{background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);padding:0 1rem;font-size:0.85rem;font-family:var(--font);cursor:pointer;align-self:flex-end;height:68px;min-width:64px;font-weight:700}
+
+/* ADMIN */
+.upload-section{background:var(--surface);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow)}
+.upload-section h3{font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:0.85rem}
+.upload-area{border:2px dashed var(--border);border-radius:var(--radius-sm);padding:1.5rem;text-align:center;cursor:pointer;transition:all 0.2s}
+.upload-area:hover{border-color:var(--red);background:var(--red-bg)}
+.upload-area p{font-size:0.83rem;color:var(--text3);margin-top:6px}
+.upload-area.has-file{border-color:var(--success);background:var(--success-bg)}
+.upload-area.has-file p{color:var(--success)}
+.btn-upload{margin-top:10px;width:100%;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);padding:0.75rem;font-size:0.9rem;font-family:var(--font);cursor:pointer;font-weight:700}
+.btn-upload:disabled{background:var(--text3);cursor:not-allowed}
+.upload-status{margin-top:8px;font-size:0.82rem;padding:0.5rem 0.75rem;border-radius:var(--radius-sm);display:none;font-weight:600}
+.upload-status.ok{background:var(--success-bg);color:var(--success);display:block}
+.upload-status.err{background:var(--red-bg);color:var(--red);display:block}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;display:none;align-items:center;justify-content:center;padding:1.5rem}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:var(--radius);padding:1.5rem;width:100%;max-width:360px;box-shadow:var(--shadow-md)}
+.modal h3{font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:1.25rem}
+.modal .form-group{margin-bottom:1rem}
+.modal-actions{display:flex;gap:8px;margin-top:1.25rem}
+.btn-cancel{flex:1;background:var(--surface2);color:var(--text2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.72rem;font-size:0.9rem;font-family:var(--font);cursor:pointer;font-weight:600}
+.btn-confirm{flex:1;background:var(--red);color:#fff;border:none;border-radius:var(--radius-sm);padding:0.72rem;font-size:0.9rem;font-family:var(--font);cursor:pointer;font-weight:700}
+
+/* PERFIL */
+.logout-btn{display:flex;align-items:center;gap:6px;background:transparent;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.6rem 0.9rem;font-size:0.85rem;font-family:var(--font);color:var(--text2);cursor:pointer;margin-top:1rem;width:100%;justify-content:center;font-weight:600}
+.logout-btn:hover{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+.change-pwd-banner{background:var(--gold-bg);border:1px solid #ffd080;border-radius:var(--radius-sm);padding:0.75rem 1rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.change-pwd-banner p{font-size:0.82rem;color:var(--gold)}
+.btn-change-pwd{background:var(--gold);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:0.78rem;font-family:var(--font);cursor:pointer;font-weight:700;white-space:nowrap}
+.empty-state{text-align:center;padding:2.5rem 1rem;color:var(--text3);font-size:0.9rem}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen" class="screen active">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon"><span>EK</span></div>
+      <h1>Erlach Kids</h1>
+      <p>Itaparica · Controle Financeiro</p>
+    </div>
+    <div id="login-error" class="login-error">Usuário ou senha incorretos.</div>
+    <div class="form-group">
+      <label>Usuário</label>
+      <input type="text" id="login-user" placeholder="seu.usuario" autocomplete="username" autocapitalize="none">
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Entrar</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen" class="screen">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <div class="topbar-icon">EK</div>
+      <div class="topbar-title">
+        <h2>Erlach Kids</h2>
+        <p id="topbar-role">Carregando...</p>
+      </div>
+    </div>
+    <div class="avatar" id="user-avatar" onclick="showTab('perfil')">?</div>
+  </div>
+  <div class="nav-tabs" id="nav-tabs">
+    <div class="nav-tab active" onclick="showTab('dashboard')">Dashboard</div>
+    <div class="nav-tab" onclick="showTab('alunos')">Alunos</div>
+    <div class="nav-tab admin-only" onclick="showTab('admin')" style="display:none">Admin</div>
+    <div class="nav-tab" onclick="showTab('perfil')">Perfil</div>
+  </div>
+  <div class="content" id="main-content"></div>
+</div>
+
+<!-- DETAIL -->
+<div id="detail-screen" class="screen">
+  <div class="detail-header">
+    <button class="btn-back" onclick="closeDetail()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </button>
+    <div class="detail-header-info">
+      <h2 id="detail-name">—</h2>
+      <p id="detail-matricula">—</p>
+    </div>
+  </div>
+  <div class="detail-content" id="detail-content"></div>
+</div>
+
+<!-- MODAL SENHA -->
+<div class="modal-overlay" id="modal-pwd">
+  <div class="modal">
+    <h3>Trocar senha</h3>
+    <div class="form-group"><label>Nova senha</label><input type="password" id="new-pwd1" placeholder="Nova senha"></div>
+    <div class="form-group"><label>Confirmar</label><input type="password" id="new-pwd2" placeholder="Confirmar senha"></div>
+    <div id="pwd-error" class="login-error"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn-confirm" onclick="saveNewPassword()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DADOS
+// ============================================================
+const USERS = {
+  'admin':         { password:'erlach@110919', role:'admin',  displayName:'Admin',   mustChange:false },
+  'dheyner.erlach':{ password:'erlach@2026',   role:'gestor', displayName:'Dheyner', mustChange:true  }
+};
+
+let estudantesBase = [
+  {matricula:'200250',nome:'Alice Ferreira Gegenheimer',curso:'EF',periodo:'M2',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2205,desc:0,acresc:0,apagar:2205,whatsapp:''},
+  {matricula:'200209',nome:'Amaga Faria Neves',curso:'EF',periodo:'M2',turma:'A',parcela:'8/3',limite:'05/06/2026',valor:2353,desc:0,acresc:0,apagar:2353,whatsapp:''},
+  {matricula:'200344',nome:'Ana Cardoso Brito',curso:'EF',periodo:'M1',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:2100,desc:0,acresc:0,apagar:2100,whatsapp:''},
+  {matricula:'200325',nome:'Ana Chamão Dansi',curso:'EF',periodo:'M1',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80,whatsapp:''},
+  {matricula:'200346',nome:'André Silveira Bueno',curso:'EF',periodo:'M2',turma:'A',parcela:'4/10',limite:'10/06/2026',valor:2353,desc:0,acresc:0,apagar:2353,whatsapp:''},
+  {matricula:'200259',nome:'Antonella Fabiano Pignaton',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:1395,desc:0,acresc:0,apagar:1395,whatsapp:''},
+  {matricula:'200183',nome:'Antonella Puziol Effigen',curso:'EF',periodo:'P1',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:1570.80,desc:154,acresc:0,apagar:1416.80,whatsapp:''},
+  {matricula:'200334',nome:'Arthur Araujo Gomes dos Reis',curso:'EF',periodo:'J',turma:'A',parcela:'6/12',limite:'15/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80,whatsapp:''},
+  {matricula:'200184',nome:'Arthur Guimarães Bronil',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2513,desc:0,acresc:0,apagar:2513,whatsapp:''},
+  {matricula:'200221',nome:'Arthur Zaché Tononi',curso:'EF',periodo:'P1',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2050,desc:0,acresc:0,apagar:2050,whatsapp:''},
+  {matricula:'200271',nome:'Artur Lugon Faria',curso:'EF',periodo:'M2',turma:'A',parcela:'6/12',limite:'07/06/2026',valor:2205,desc:220.50,acresc:0,apagar:1984.50,whatsapp:''},
+  {matricula:'200322',nome:'Asafe Cardoso Brito',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:2100,desc:0,acresc:0,apagar:2100,whatsapp:''},
+  {matricula:'200348',nome:'Augusto Reis de Oliveira Amaro',curso:'EF',periodo:'M2',turma:'A',parcela:'3/9',limite:'05/06/2026',valor:2014,desc:202,acresc:0,apagar:1812,whatsapp:''},
+  {matricula:'200350',nome:'Ben Fiorotti Coutinho Vaz',curso:'EF',periodo:'M2',turma:'A',parcela:'3/9',limite:'05/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80,whatsapp:''},
+  {matricula:'200353',nome:'Benício dos Santos Loss Binda',curso:'EF',periodo:'P1',turma:'A',parcela:'6/12',limite:'15/06/2026',valor:750,desc:0,acresc:0,apagar:750,whatsapp:''},
+  {matricula:'200237',nome:'Bernardo Guzanshe Basílio Pereira Telse',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2205,desc:0,acresc:85,apagar:2290,whatsapp:''},
+  {matricula:'200238',nome:'Bernardo Mendonça de Albuquerque',curso:'EF',periodo:'M2',turma:'A',parcela:'8/14',limite:'05/06/2026',valor:1798,desc:89.90,acresc:0,apagar:1708.10,whatsapp:''},
+  {matricula:'200353',nome:'Bryan Costa Roncete Ramos',curso:'EF',periodo:'M2',turma:'A',parcela:'2/8',limite:'05/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80,whatsapp:''},
+  {matricula:'200257',nome:'Carlos Miguel Kutz Griffo',curso:'EF',periodo:'P1',turma:'A',parcela:'8/14',limite:'05/06/2026',valor:2353,desc:0,acresc:0,apagar:2353,whatsapp:''},
+  {matricula:'200262',nome:'Catharina Reis Keller',curso:'EF',periodo:'M2',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2221.30,desc:0,acresc:0,apagar:2221.30,whatsapp:''},
+];
+
+let devedores = estudantesBase.slice(0,12).map(e=>e.matricula);
+let anotacoes = {};
+let currentUser = null;
+let searchQuery = '';
+let activeFilter = 'todos';
+let deveEntrar = 0;
+let pizzaChart = null;
+
+// ============================================================
+// AUTH
+// ============================================================
+function doLogin(){
+  const user = document.getElementById('login-user').value.trim().toLowerCase();
+  const pass = document.getElementById('login-pass').value;
+  const err  = document.getElementById('login-error');
+  if(USERS[user] && USERS[user].password===pass){
+    currentUser={username:user,...USERS[user]};
+    err.style.display='none';
+    document.getElementById('login-screen').classList.remove('active');
+    document.getElementById('app-screen').classList.add('active');
+    initApp();
+  } else {
+    err.style.display='block';
+  }
+}
+document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('login-user').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('login-pass').focus();});
+
+function initApp(){
+  document.getElementById('user-avatar').textContent=currentUser.displayName[0].toUpperCase();
+  document.getElementById('topbar-role').textContent=roleLabel(currentUser.role);
+  if(currentUser.role==='admin') document.querySelector('.admin-only').style.display='';
+  showTab('dashboard');
+}
+function roleLabel(r){return r==='admin'?'Administrador':'Gestão';}
+function doLogout(){
+  currentUser=null;
+  if(pizzaChart){pizzaChart.destroy();pizzaChart=null;}
+  document.getElementById('app-screen').classList.remove('active');
+  document.getElementById('login-screen').classList.add('active');
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function showTab(tab){
+  document.querySelectorAll('.nav-tab').forEach(t=>{
+    const map={'Dashboard':'dashboard','Alunos':'alunos','Admin':'admin','Perfil':'perfil'};
+    t.classList.toggle('active',map[t.textContent]===tab);
+  });
+  if(pizzaChart&&tab!=='dashboard'){pizzaChart.destroy();pizzaChart=null;}
+  const c=document.getElementById('main-content');
+  if(tab==='dashboard')     c.innerHTML=renderDashboard();
+  else if(tab==='alunos')   c.innerHTML=renderAlunos();
+  else if(tab==='admin')    c.innerHTML=renderAdmin();
+  else if(tab==='perfil')   c.innerHTML=renderPerfil();
+  if(tab==='dashboard') initChart();
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function renderDashboard(){
+  const total=estudantesBase.length;
+  const nDev=devedores.length;
+  const nOk=total-nDev;
+  const pct=total?Math.round((nOk/total)*100):0;
+  const isAdmin=currentUser.role==='admin';
+
+  let h=`<span class="month-tag">Junho / 2026</span>`;
+
+  h+=`<div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr">
+    <div class="stat-card sc-red"><div class="s-label">Em aberto</div><div class="s-value">${nDev}</div><div class="s-sub">alunos</div></div>
+    <div class="stat-card sc-green"><div class="s-label">Em dia</div><div class="s-value">${nOk}</div><div class="s-sub">alunos</div></div>
+    <div class="stat-card sc-green"><div class="s-label">Adimplência</div><div class="s-value">${pct}%</div><div class="s-sub">pagaram</div></div>
+  </div>`;
+
+  // Deve Entrar — visível para ambos, editável só admin
+  const deVal=deveEntrar>0?`R$ ${fmt(deveEntrar)}`:'Não definido';
+  h+=`<div class="deve-entrar-card">
+    <div class="de-top">
+      <span>Deve Entrar (mês)</span>
+      ${isAdmin?`<button class="btn-edit-saldo" onclick="toggleEditSaldo()">✏ Editar</button>`:''}
+    </div>
+    <div class="de-valor" id="saldo-display">${deVal}</div>
+    <div class="de-sub">Valor esperado para Junho/2026</div>
+    ${isAdmin?`<div class="saldo-edit-row" id="saldo-edit-row">
+      <input type="number" id="saldo-input" placeholder="Valor esperado..." value="${deveEntrar||''}">
+      <button class="btn-salvar-saldo" onclick="salvarSaldo()">Salvar</button>
+    </div>`:''}
+  </div>`;
+
+  // Gráfico
+  h+=`<div class="chart-card">
+    <h3>Situação dos pagamentos</h3>
+    <div class="chart-wrap">
+      <canvas id="pizzaCanvas" width="180" height="180" style="max-width:180px;max-height:180px"></canvas>
+      <div class="chart-center"><div class="pct">${pct}%</div><div class="lbl">em dia</div></div>
+    </div>
+    <div class="chart-legend">
+      <div class="leg-item"><div class="leg-dot" style="background:var(--red)"></div>Em aberto (${nDev})</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--success)"></div>Em dia (${nOk})</div>
+    </div>
+  </div>`;
+
+  // Em aberto
+  h+=`<div class="list-card"><div class="list-card-title">Em aberto <span class="bc">${nDev}</span></div>`;
+  estudantesBase.filter(e=>devedores.includes(e.matricula)).forEach(e=>{
+    h+=`<div class="s-row" onclick="openDetail('${e.matricula}')">
+      <div><div class="s-name">${e.nome}</div><div class="s-mat">#${e.matricula}</div></div>
+      <div><div class="s-apagar">R$ ${fmt(e.apagar)}</div><div class="s-venc">Venc. ${e.limite.substring(0,5)}</div></div>
+    </div>`;
+  });
+  h+=`</div>`;
+
+  // Em dia
+  h+=`<div class="list-card"><div class="list-card-title">Em dia <span class="bc green">${nOk}</span></div>`;
+  estudantesBase.filter(e=>!devedores.includes(e.matricula)).forEach(e=>{
+    h+=`<div class="s-row" onclick="openDetail('${e.matricula}')">
+      <div><div class="s-name">${e.nome}</div><div class="s-mat">#${e.matricula}</div></div>
+      <span class="badge-ok">Pago</span>
+    </div>`;
+  });
+  h+=`</div>`;
+
+  return h;
+}
+
+function initChart(){
+  const canvas=document.getElementById('pizzaCanvas');
+  if(!canvas)return;
+  const total=estudantesBase.length;
+  const nDev=devedores.length;
+  const nOk=total-nDev;
+  if(pizzaChart){pizzaChart.destroy();}
+  pizzaChart=new Chart(canvas.getContext('2d'),{
+    type:'doughnut',
+    data:{datasets:[{data:[nDev,nOk],backgroundColor:['#c8102e','#1a7a4a'],borderWidth:0,hoverOffset:6}]},
+    options:{cutout:'72%',plugins:{legend:{display:false},tooltip:{enabled:true}},animation:{animateRotate:true,duration:900}}
+  });
+}
+
+function toggleEditSaldo(){
+  const row=document.getElementById('saldo-edit-row');
+  row.style.display=row.style.display==='flex'?'none':'flex';
+}
+function salvarSaldo(){
+  const val=parseFloat(document.getElementById('saldo-input').value);
+  if(!isNaN(val)&&val>=0){
+    deveEntrar=val;
+    document.getElementById('saldo-display').textContent=`R$ ${fmt(val)}`;
+  }
+  document.getElementById('saldo-edit-row').style.display='none';
+}
+function fmt(v){return v.toLocaleString('pt-BR',{minimumFractionDigits:2});}
+
+// ============================================================
+// ALUNOS
+// ============================================================
+function renderAlunos(){
+  let h=`<div class="filter-bar">
+    <input type="text" placeholder="Buscar por nome ou matrícula..." value="${searchQuery}" oninput="doSearch(this.value)">
+  </div>
+  <div class="filter-bar">
+    <select onchange="doFilter(this.value)">
+      <option value="todos" ${activeFilter==='todos'?'selected':''}>Todos</option>
+      <option value="devendo" ${activeFilter==='devendo'?'selected':''}>Em aberto</option>
+      <option value="em-dia" ${activeFilter==='em-dia'?'selected':''}>Em dia</option>
+    </select>
+  </div>`;
+
+  const lista=estudantesBase.filter(e=>{
+    const q=searchQuery.toLowerCase();
+    const ok=!q||e.nome.toLowerCase().includes(q)||e.matricula.includes(q);
+    const st=devedores.includes(e.matricula)?'devendo':'em-dia';
+    return ok&&(activeFilter==='todos'||activeFilter===st);
+  });
+
+  if(!lista.length){h+=`<div class="empty-state">Nenhum aluno encontrado.</div>`;return h;}
+
+  h+=`<div class="student-list">`;
+  lista.forEach(e=>{
+    const st=devedores.includes(e.matricula)?'devendo':'em-dia';
+    const badgeLabel=st==='devendo'?'Em aberto':'Em dia';
+    h+=`<div class="student-card ${st}" onclick="openDetail('${e.matricula}')">
+      <div class="student-card-header">
+        <div><div class="student-name">${e.nome}</div><div class="student-matricula">#${e.matricula}</div></div>
+        <span class="badge ${st}">${badgeLabel}</span>
+      </div>
+      <div class="student-card-footer">
+        <span class="student-info-sm">Venc. ${e.limite}</span>
+        <span class="student-apagar-val">R$ ${fmt(e.apagar)}</span>
+      </div>
+    </div>`;
+  });
+  h+=`</div>`;
+  return h;
+}
+
+function doSearch(q){searchQuery=q;document.getElementById('main-content').innerHTML=renderAlunos();}
+function doFilter(v){activeFilter=v;document.getElementById('main-content').innerHTML=renderAlunos();}
+
+// ============================================================
+// DETAIL
+// ============================================================
+function openDetail(matricula){
+  const e=estudantesBase.find(x=>x.matricula===matricula);
+  if(!e)return;
+  const st=devedores.includes(matricula)?'devendo':'em-dia';
+  const notas=anotacoes[matricula]||[];
+
+  document.getElementById('detail-name').textContent=e.nome;
+  document.getElementById('detail-matricula').textContent=`Matrícula #${e.matricula}`;
+
+  let h=`<div class="info-card"><h3>Informações</h3>
+    <div class="info-row"><span class="info-label">Status</span><span class="info-value ${st}">${st==='devendo'?'Em aberto':'Em dia'}</span></div>
+    <div class="info-row"><span class="info-label">Curso</span><span class="info-value">${e.curso}</span></div>
+    <div class="info-row"><span class="info-label">Período</span><span class="info-value">${e.periodo}</span></div>
+    <div class="info-row"><span class="info-label">Turma</span><span class="info-value">${e.turma}</span></div>
+    <div class="info-row"><span class="info-label">Parcela</span><span class="info-value">${e.parcela}</span></div>
+    <div class="info-row"><span class="info-label">Vencimento</span><span class="info-value">${e.limite}</span></div>
+  </div>`;
+
+  h+=`<div class="info-card"><h3>Financeiro</h3>
+    <div class="info-row"><span class="info-label">Mensalidade</span><span class="info-value">R$ ${fmt(e.valor)}</span></div>
+    <div class="info-row"><span class="info-label">Desconto</span><span class="info-value" style="color:var(--success)">- R$ ${fmt(e.desc)}</span></div>
+    <div class="info-row"><span class="info-label">Acréscimo</span><span class="info-value" style="color:var(--red)">+ R$ ${fmt(e.acresc)}</span></div>
+    <div class="info-row"><span class="info-label">À pagar</span><span class="info-value highlight">R$ ${fmt(e.apagar)}</span></div>
+  </div>`;
+
+  if(st==='devendo'){
+    const msg=encodeURIComponent(`Olá ${e.nome.split(' ')[0]}, tudo bem? Identificamos que sua mensalidade referente a Junho/2026 no valor de R$ ${fmt(e.apagar)} está em aberto (vencimento ${e.limite}). Por favor, entre em contato para regularizar. Obrigado! – Erlach Kids`);
+    const phone=e.whatsapp?`55${e.whatsapp.replace(/\D/g,'')}`:'';
+    h+=`<a class="btn-whatsapp" href="https://wa.me/${phone}?text=${msg}" target="_blank">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.561 4.14 1.534 5.876L.057 23.491l5.764-1.512A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.002-1.368l-.359-.214-3.723.976.994-3.634-.234-.375A9.818 9.818 0 1112 21.818z"/></svg>
+      Enviar cobrança via WhatsApp
+    </a>`;
+  }
+
+  h+=`<div class="info-card"><h3>Anotações</h3>
+    <div class="notes-list" id="notes-list">`;
+  if(!notas.length){h+=`<div class="notes-empty">Nenhuma anotação ainda.</div>`;}
+  else{notas.slice().reverse().forEach(n=>{h+=`<div class="note-item"><div class="note-meta"><strong>${n.user}</strong><span>${n.date}</span></div><div class="note-text">${n.text}</div></div>`;});}
+  h+=`</div>
+    <div class="note-input-row">
+      <textarea id="note-input" placeholder="Escreva uma anotação..."></textarea>
+      <button class="btn-add-note" onclick="addNote('${matricula}')">Salvar</button>
+    </div>
+  </div>`;
+
+  document.getElementById('detail-content').innerHTML=h;
+  document.getElementById('app-screen').classList.remove('active');
+  document.getElementById('detail-screen').classList.add('active');
+}
+
+function closeDetail(){
+  document.getElementById('detail-screen').classList.remove('active');
+  document.getElementById('app-screen').classList.add('active');
+}
+
+function addNote(matricula){
+  const input=document.getElementById('note-input');
+  const text=input.value.trim();
+  if(!text)return;
+  if(!anotacoes[matricula])anotacoes[matricula]=[];
+  const now=new Date();
+  const date=now.toLocaleDateString('pt-BR')+' '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  anotacoes[matricula].push({user:currentUser.displayName,date,text});
+  input.value='';
+  const notas=anotacoes[matricula].slice().reverse();
+  document.getElementById('notes-list').innerHTML=notas.map(n=>`<div class="note-item"><div class="note-meta"><strong>${n.user}</strong><span>${n.date}</span></div><div class="note-text">${n.text}</div></div>`).join('');
+}
+
+// ============================================================
+// ADMIN
+// ============================================================
+function renderAdmin(){
+  if(currentUser.role!=='admin')return'<div class="empty-state">Acesso negado.</div>';
+  return`<div class="upload-section" style="margin-bottom:1rem">
+    <h3>📂 Relatório Base (todos os alunos)</h3>
+    <p style="font-size:0.82rem;color:var(--text3);margin-bottom:12px">CSV/Excel com todos os alunos cadastrados.</p>
+    <div class="upload-area" id="upload-base-area" onclick="document.getElementById('file-base').click()">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      <p id="base-file-name">Toque para selecionar o arquivo</p>
+    </div>
+    <input type="file" id="file-base" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFile('base',this)">
+    <button class="btn-upload" id="btn-upload-base" disabled onclick="processUpload('base')">Processar Relatório Base</button>
+    <div class="upload-status" id="status-base"></div>
+  </div>
+  <div class="upload-section">
+    <h3>📋 Relatório Mensal (em aberto)</h3>
+    <p style="font-size:0.82rem;color:var(--text3);margin-bottom:12px">CSV/Excel com alunos que ainda não pagaram.</p>
+    <div class="upload-area" id="upload-month-area" onclick="document.getElementById('file-month').click()">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+      <p id="month-file-name">Toque para selecionar o arquivo</p>
+    </div>
+    <input type="file" id="file-month" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFile('month',this)">
+    <button class="btn-upload" id="btn-upload-month" disabled onclick="processUpload('month')">Processar Relatório Mensal</button>
+    <div class="upload-status" id="status-month"></div>
+  </div>`;
+}
+
+let selFiles={};
+function handleFile(type,input){
+  const f=input.files[0];if(!f)return;
+  selFiles[type]=f;
+  document.getElementById(`${type==='base'?'base':'month'}-file-name`).textContent=f.name;
+  document.getElementById(`upload-${type==='base'?'base':'month'}-area`).classList.add('has-file');
+  document.getElementById(`btn-upload-${type==='base'?'base':'month'}`).disabled=false;
+}
+function processUpload(type){
+  const f=selFiles[type];if(!f)return;
+  const el=document.getElementById(`status-${type==='base'?'base':'month'}`);
+  el.className='upload-status ok';
+  el.textContent=type==='base'
+    ?`✓ Relatório base "${f.name}" carregado! ${estudantesBase.length} alunos.`
+    :`✓ Relatório mensal "${f.name}" processado. ${devedores.length} alunos em aberto.`;
+}
+
+// ============================================================
+// PERFIL
+// ============================================================
+function renderPerfil(){
+  const mc=USERS[currentUser.username].mustChange;
+  let h='';
+  if(mc)h+=`<div class="change-pwd-banner"><p>⚠ Troque sua senha no primeiro acesso.</p><button class="btn-change-pwd" onclick="openModal()">Trocar agora</button></div>`;
+  h+=`<div class="info-card"><h3>Meu perfil</h3>
+    <div class="info-row"><span class="info-label">Usuário</span><span class="info-value">${currentUser.username}</span></div>
+    <div class="info-row"><span class="info-label">Nome</span><span class="info-value">${currentUser.displayName}</span></div>
+    <div class="info-row"><span class="info-label">Acesso</span><span class="info-value">${roleLabel(currentUser.role)}</span></div>
+  </div>
+  <button class="btn-primary" style="margin-top:1rem" onclick="openModal()">Trocar senha</button>
+  <button class="logout-btn" onclick="doLogout()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+    Sair da conta
+  </button>`;
+  return h;
+}
+
+function openModal(){document.getElementById('modal-pwd').classList.add('open');}
+function closeModal(){document.getElementById('modal-pwd').classList.remove('open');}
+function saveNewPassword(){
+  const p1=document.getElementById('new-pwd1').value;
+  const p2=document.getElementById('new-pwd2').value;
+  const err=document.getElementById('pwd-error');
+  if(p1.length<6){err.style.display='block';err.textContent='Senha deve ter ao menos 6 caracteres.';return;}
+  if(p1!==p2){err.style.display='block';err.textContent='As senhas não coincidem.';return;}
+  USERS[currentUser.username].password=p1;
+  USERS[currentUser.username].mustChange=false;
+  err.style.display='none';
+  closeModal();
+  document.getElementById('new-pwd1').value='';
+  document.getElementById('new-pwd2').value='';
+  showTab('perfil');
+  alert('Senha alterada com sucesso!');
+}
+
+// SERVICE WORKER
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});
+}
+</script>
+</body>
+</html>
