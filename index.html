@@ -301,30 +301,9 @@ const SUPABASE_URL = 'https://znwkilfyoetxirtsnovw.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpud2tpbGZ5b2V0eGlydHNub3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1OTc1MjQsImV4cCI6MjA5ODE3MzUyNH0.1syI3t6tQExcPcWYpgGcz_cqT49dVXaQw_RSalwjTr4';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let estudantesBase = [
-  {matricula:'200250',nome:'Alice Ferreira Gegenheimer',curso:'EF',periodo:'M2',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2205,desc:0,acresc:0,apagar:2205},
-  {matricula:'200209',nome:'Amaga Faria Neves',curso:'EF',periodo:'M2',turma:'A',parcela:'8/3',limite:'05/06/2026',valor:2353,desc:0,acresc:0,apagar:2353},
-  {matricula:'200344',nome:'Ana Cardoso Brito',curso:'EF',periodo:'M1',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:2100,desc:0,acresc:0,apagar:2100},
-  {matricula:'200325',nome:'Ana Chamão Dansi',curso:'EF',periodo:'M1',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80},
-  {matricula:'200346',nome:'André Silveira Bueno',curso:'EF',periodo:'M2',turma:'A',parcela:'4/10',limite:'10/06/2026',valor:2353,desc:0,acresc:0,apagar:2353},
-  {matricula:'200259',nome:'Antonella Fabiano Pignaton',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:1395,desc:0,acresc:0,apagar:1395},
-  {matricula:'200183',nome:'Antonella Puziol Effigen',curso:'EF',periodo:'P1',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:1570.80,desc:154,acresc:0,apagar:1416.80},
-  {matricula:'200334',nome:'Arthur Araujo Gomes dos Reis',curso:'EF',periodo:'J',turma:'A',parcela:'6/12',limite:'15/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80},
-  {matricula:'200184',nome:'Arthur Guimarães Bronil',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2513,desc:0,acresc:0,apagar:2513},
-  {matricula:'200221',nome:'Arthur Zaché Tononi',curso:'EF',periodo:'P1',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2050,desc:0,acresc:0,apagar:2050},
-  {matricula:'200271',nome:'Artur Lugon Faria',curso:'EF',periodo:'M2',turma:'A',parcela:'6/12',limite:'07/06/2026',valor:2205,desc:220.50,acresc:0,apagar:1984.50},
-  {matricula:'200322',nome:'Asafe Cardoso Brito',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:2100,desc:0,acresc:0,apagar:2100},
-  {matricula:'200348',nome:'Augusto Reis de Oliveira Amaro',curso:'EF',periodo:'M2',turma:'A',parcela:'3/9',limite:'05/06/2026',valor:2014,desc:202,acresc:0,apagar:1812},
-  {matricula:'200350',nome:'Ben Fiorotti Coutinho Vaz',curso:'EF',periodo:'M2',turma:'A',parcela:'3/9',limite:'05/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80},
-  {matricula:'200353',nome:'Benício dos Santos Loss Binda',curso:'EF',periodo:'P1',turma:'A',parcela:'6/12',limite:'15/06/2026',valor:750,desc:0,acresc:0,apagar:750},
-  {matricula:'200237',nome:'Bernardo Guzanshe Basílio Pereira Telse',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2205,desc:0,acresc:85,apagar:2290},
-  {matricula:'200238',nome:'Bernardo Mendonça de Albuquerque',curso:'EF',periodo:'M2',turma:'A',parcela:'8/14',limite:'05/06/2026',valor:1798,desc:89.90,acresc:0,apagar:1708.10},
-  {matricula:'200353',nome:'Bryan Costa Roncete Ramos',curso:'EF',periodo:'M2',turma:'A',parcela:'2/8',limite:'05/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80},
-  {matricula:'200257',nome:'Carlos Miguel Kutz Griffo',curso:'EF',periodo:'P1',turma:'A',parcela:'8/14',limite:'05/06/2026',valor:2353,desc:0,acresc:0,apagar:2353},
-  {matricula:'200262',nome:'Catharina Reis Keller',curso:'EF',periodo:'M2',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2221.30,desc:0,acresc:0,apagar:2221.30},
-];
-
-let devedores = estudantesBase.slice(0,12).map(e=>e.matricula);
+let estudantesBase = [];
+let devedores = [];
+let mesReferencia = '';
 let anotacoes = {};
 let currentUser = null;
 let searchQuery = '';
@@ -406,17 +385,25 @@ function showTab(tab){
 // DASHBOARD
 // ============================================================
 function renderDashboard(){
+  if(estudantesBase.length===0){
+    return `<div class="empty-state" style="padding:3rem 1rem">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 0 1 0 10h-2M11 12h2"/></svg>
+      <p style="margin-top:1rem;font-size:1rem;font-weight:600;color:var(--text2)">Nenhum dado carregado</p>
+      <p style="margin-top:6px;font-size:0.85rem;color:var(--text3)">Acesse a aba <strong>Admin</strong> e faça o upload<br>do Relatório Base e do Relatório Mensal.</p>
+    </div>`;
+  }
   const total=estudantesBase.length;
   const nDev=devedores.length;
   const nOk=total-nDev;
   const pct=total?Math.round((nOk/total)*100):0;
   const isAdmin=currentUser.role==='admin';
 
-  // Detect month from devedores data or use current
-  const now=new Date();
-  const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const mesAtual=`${meses[now.getMonth()]} / ${now.getFullYear()}`;
-  let h=`<span class="month-tag">${mesAtual}</span>`;
+  const mesDisplay = mesReferencia || (() => {
+    const now=new Date();
+    const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    return `${meses[now.getMonth()]} / ${now.getFullYear()}`;
+  })();
+  let h=`<span class="month-tag">${mesDisplay}</span>`;
 
   h+=`<div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr">
     <div class="stat-card sc-red"><div class="s-label">Em aberto</div><div class="s-value">${nDev}</div><div class="s-sub">alunos</div></div>
@@ -478,6 +465,13 @@ function renderDashboard(){
 function initChart(){
   const canvas=document.getElementById('pizzaCanvas');
   if(!canvas)return;
+  if(estudantesBase.length===0){
+    return `<div class="empty-state" style="padding:3rem 1rem">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"><path d="M9 17H7A5 5 0 0 1 7 7h2M15 7h2a5 5 0 0 1 0 10h-2M11 12h2"/></svg>
+      <p style="margin-top:1rem;font-size:1rem;font-weight:600;color:var(--text2)">Nenhum dado carregado</p>
+      <p style="margin-top:6px;font-size:0.85rem;color:var(--text3)">Acesse a aba <strong>Admin</strong> e faça o upload<br>do Relatório Base e do Relatório Mensal.</p>
+    </div>`;
+  }
   const total=estudantesBase.length;
   const nDev=devedores.length;
   const nOk=total-nDev;
@@ -754,8 +748,14 @@ function processUpload(type){
         const mats=dataRows.map(r=>r[0].trim()).filter(Boolean);
         // Remove duplicates
         devedores=[...new Set(mats)];
+        // Try to extract month from file content (line 2 or 3)
+        const allLines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
+        for(const line of allLines.slice(0,5)){
+          const m=line.match(/(Janeiro|Fevereiro|Março|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro)[/\s]*(\d{4})/i);
+          if(m){mesReferencia=`${m[1].charAt(0).toUpperCase()+m[1].slice(1)} / ${m[2]}`;break;}
+        }
         el.className='upload-status ok';
-        el.textContent=`✓ Relatório mensal carregado! ${devedores.length} alunos em aberto.`;
+        el.textContent=`✓ Relatório mensal carregado! ${devedores.length} alunos em aberto${mesReferencia?' ('+mesReferencia+')':''}.`;
       }
       // Refresh dashboard if active
       if(currentTab==='dashboard'){showTab('dashboard');}
