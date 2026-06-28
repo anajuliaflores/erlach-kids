@@ -739,7 +739,7 @@ async function processUpload(type){
   btn.disabled=true;btn.textContent='Processando...';
 
   const reader=new FileReader();
-  reader.onload=function(e){
+  reader.onload=async function(e){
     try{
       const text=e.target.result;
       const rows=parseCSV(text);
