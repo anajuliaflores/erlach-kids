@@ -302,26 +302,26 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let estudantesBase = [
-  {matricula:'200250',nome:'Alice Ferreira Gegenheimer',curso:'EF',periodo:'M2',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2205,desc:0,acresc:0,apagar:2205,whatsapp:''},
-  {matricula:'200209',nome:'Amaga Faria Neves',curso:'EF',periodo:'M2',turma:'A',parcela:'8/3',limite:'05/06/2026',valor:2353,desc:0,acresc:0,apagar:2353,whatsapp:''},
-  {matricula:'200344',nome:'Ana Cardoso Brito',curso:'EF',periodo:'M1',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:2100,desc:0,acresc:0,apagar:2100,whatsapp:''},
-  {matricula:'200325',nome:'Ana Chamão Dansi',curso:'EF',periodo:'M1',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80,whatsapp:''},
-  {matricula:'200346',nome:'André Silveira Bueno',curso:'EF',periodo:'M2',turma:'A',parcela:'4/10',limite:'10/06/2026',valor:2353,desc:0,acresc:0,apagar:2353,whatsapp:''},
-  {matricula:'200259',nome:'Antonella Fabiano Pignaton',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:1395,desc:0,acresc:0,apagar:1395,whatsapp:''},
-  {matricula:'200183',nome:'Antonella Puziol Effigen',curso:'EF',periodo:'P1',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:1570.80,desc:154,acresc:0,apagar:1416.80,whatsapp:''},
-  {matricula:'200334',nome:'Arthur Araujo Gomes dos Reis',curso:'EF',periodo:'J',turma:'A',parcela:'6/12',limite:'15/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80,whatsapp:''},
-  {matricula:'200184',nome:'Arthur Guimarães Bronil',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2513,desc:0,acresc:0,apagar:2513,whatsapp:''},
-  {matricula:'200221',nome:'Arthur Zaché Tononi',curso:'EF',periodo:'P1',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2050,desc:0,acresc:0,apagar:2050,whatsapp:''},
-  {matricula:'200271',nome:'Artur Lugon Faria',curso:'EF',periodo:'M2',turma:'A',parcela:'6/12',limite:'07/06/2026',valor:2205,desc:220.50,acresc:0,apagar:1984.50,whatsapp:''},
-  {matricula:'200322',nome:'Asafe Cardoso Brito',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:2100,desc:0,acresc:0,apagar:2100,whatsapp:''},
-  {matricula:'200348',nome:'Augusto Reis de Oliveira Amaro',curso:'EF',periodo:'M2',turma:'A',parcela:'3/9',limite:'05/06/2026',valor:2014,desc:202,acresc:0,apagar:1812,whatsapp:''},
-  {matricula:'200350',nome:'Ben Fiorotti Coutinho Vaz',curso:'EF',periodo:'M2',turma:'A',parcela:'3/9',limite:'05/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80,whatsapp:''},
-  {matricula:'200353',nome:'Benício dos Santos Loss Binda',curso:'EF',periodo:'P1',turma:'A',parcela:'6/12',limite:'15/06/2026',valor:750,desc:0,acresc:0,apagar:750,whatsapp:''},
-  {matricula:'200237',nome:'Bernardo Guzanshe Basílio Pereira Telse',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2205,desc:0,acresc:85,apagar:2290,whatsapp:''},
-  {matricula:'200238',nome:'Bernardo Mendonça de Albuquerque',curso:'EF',periodo:'M2',turma:'A',parcela:'8/14',limite:'05/06/2026',valor:1798,desc:89.90,acresc:0,apagar:1708.10,whatsapp:''},
-  {matricula:'200353',nome:'Bryan Costa Roncete Ramos',curso:'EF',periodo:'M2',turma:'A',parcela:'2/8',limite:'05/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80,whatsapp:''},
-  {matricula:'200257',nome:'Carlos Miguel Kutz Griffo',curso:'EF',periodo:'P1',turma:'A',parcela:'8/14',limite:'05/06/2026',valor:2353,desc:0,acresc:0,apagar:2353,whatsapp:''},
-  {matricula:'200262',nome:'Catharina Reis Keller',curso:'EF',periodo:'M2',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2221.30,desc:0,acresc:0,apagar:2221.30,whatsapp:''},
+  {matricula:'200250',nome:'Alice Ferreira Gegenheimer',curso:'EF',periodo:'M2',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2205,desc:0,acresc:0,apagar:2205},
+  {matricula:'200209',nome:'Amaga Faria Neves',curso:'EF',periodo:'M2',turma:'A',parcela:'8/3',limite:'05/06/2026',valor:2353,desc:0,acresc:0,apagar:2353},
+  {matricula:'200344',nome:'Ana Cardoso Brito',curso:'EF',periodo:'M1',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:2100,desc:0,acresc:0,apagar:2100},
+  {matricula:'200325',nome:'Ana Chamão Dansi',curso:'EF',periodo:'M1',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80},
+  {matricula:'200346',nome:'André Silveira Bueno',curso:'EF',periodo:'M2',turma:'A',parcela:'4/10',limite:'10/06/2026',valor:2353,desc:0,acresc:0,apagar:2353},
+  {matricula:'200259',nome:'Antonella Fabiano Pignaton',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:1395,desc:0,acresc:0,apagar:1395},
+  {matricula:'200183',nome:'Antonella Puziol Effigen',curso:'EF',periodo:'P1',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:1570.80,desc:154,acresc:0,apagar:1416.80},
+  {matricula:'200334',nome:'Arthur Araujo Gomes dos Reis',curso:'EF',periodo:'J',turma:'A',parcela:'6/12',limite:'15/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80},
+  {matricula:'200184',nome:'Arthur Guimarães Bronil',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2513,desc:0,acresc:0,apagar:2513},
+  {matricula:'200221',nome:'Arthur Zaché Tononi',curso:'EF',periodo:'P1',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2050,desc:0,acresc:0,apagar:2050},
+  {matricula:'200271',nome:'Artur Lugon Faria',curso:'EF',periodo:'M2',turma:'A',parcela:'6/12',limite:'07/06/2026',valor:2205,desc:220.50,acresc:0,apagar:1984.50},
+  {matricula:'200322',nome:'Asafe Cardoso Brito',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'10/06/2026',valor:2100,desc:0,acresc:0,apagar:2100},
+  {matricula:'200348',nome:'Augusto Reis de Oliveira Amaro',curso:'EF',periodo:'M2',turma:'A',parcela:'3/9',limite:'05/06/2026',valor:2014,desc:202,acresc:0,apagar:1812},
+  {matricula:'200350',nome:'Ben Fiorotti Coutinho Vaz',curso:'EF',periodo:'M2',turma:'A',parcela:'3/9',limite:'05/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80},
+  {matricula:'200353',nome:'Benício dos Santos Loss Binda',curso:'EF',periodo:'P1',turma:'A',parcela:'6/12',limite:'15/06/2026',valor:750,desc:0,acresc:0,apagar:750},
+  {matricula:'200237',nome:'Bernardo Guzanshe Basílio Pereira Telse',curso:'EF',periodo:'M3',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2205,desc:0,acresc:85,apagar:2290},
+  {matricula:'200238',nome:'Bernardo Mendonça de Albuquerque',curso:'EF',periodo:'M2',turma:'A',parcela:'8/14',limite:'05/06/2026',valor:1798,desc:89.90,acresc:0,apagar:1708.10},
+  {matricula:'200353',nome:'Bryan Costa Roncete Ramos',curso:'EF',periodo:'M2',turma:'A',parcela:'2/8',limite:'05/06/2026',valor:1570.80,desc:0,acresc:0,apagar:1570.80},
+  {matricula:'200257',nome:'Carlos Miguel Kutz Griffo',curso:'EF',periodo:'P1',turma:'A',parcela:'8/14',limite:'05/06/2026',valor:2353,desc:0,acresc:0,apagar:2353},
+  {matricula:'200262',nome:'Catharina Reis Keller',curso:'EF',periodo:'M2',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2221.30,desc:0,acresc:0,apagar:2221.30},
 ];
 
 let devedores = estudantesBase.slice(0,12).map(e=>e.matricula);
@@ -412,7 +412,11 @@ function renderDashboard(){
   const pct=total?Math.round((nOk/total)*100):0;
   const isAdmin=currentUser.role==='admin';
 
-  let h=`<span class="month-tag">Junho / 2026</span>`;
+  // Detect month from devedores data or use current
+  const now=new Date();
+  const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const mesAtual=`${meses[now.getMonth()]} / ${now.getFullYear()}`;
+  let h=`<span class="month-tag">${mesAtual}</span>`;
 
   h+=`<div class="stats-grid" style="grid-template-columns:1fr 1fr 1fr">
     <div class="stat-card sc-red"><div class="s-label">Em aberto</div><div class="s-value">${nDev}</div><div class="s-sub">alunos</div></div>
@@ -575,9 +579,9 @@ function openDetail(matricula){
   </div>`;
 
   if(st==='devendo'){
-    const msg=encodeURIComponent(`Olá ${e.nome.split(' ')[0]}, tudo bem? Identificamos que sua mensalidade referente a Junho/2026 no valor de R$ ${fmt(e.apagar)} está em aberto (vencimento ${e.limite}). Por favor, entre em contato para regularizar. Obrigado! – Erlach Kids`);
-    const phone=e.whatsapp?`55${e.whatsapp.replace(/\D/g,'')}`:'';
-    h+=`<a class="btn-whatsapp" href="https://wa.me/${phone}?text=${msg}" target="_blank">
+    const nome1=e.nome.split(' ')[0];
+    const msg=encodeURIComponent(`Olá ${nome1}, tudo bem? Identificamos que sua mensalidade no valor de R$ ${fmt(e.apagar)} está em aberto (vencimento ${e.limite}). Por favor, entre em contato para regularizar. Obrigado! – Erlach Kids`);
+    h+=`<a class="btn-whatsapp" href="https://wa.me/?text=${msg}" target="_blank">
       <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.136.561 4.14 1.534 5.876L.057 23.491l5.764-1.512A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 01-5.002-1.368l-.359-.214-3.723.976.994-3.634-.234-.375A9.818 9.818 0 1112 21.818z"/></svg>
       Enviar cobrança via WhatsApp
     </a>`;
@@ -674,17 +678,96 @@ let selFiles={};
 function handleFile(type,input){
   const f=input.files[0];if(!f)return;
   selFiles[type]=f;
-  document.getElementById(`${type==='base'?'base':'month'}-file-name`).textContent=f.name;
-  document.getElementById(`upload-${type==='base'?'base':'month'}-area`).classList.add('has-file');
-  document.getElementById(`btn-upload-${type==='base'?'base':'month'}`).disabled=false;
+  const key=type==='base'?'base':'month';
+  document.getElementById(`${key}-file-name`).textContent=f.name;
+  document.getElementById(`upload-${key}-area`).classList.add('has-file');
+  document.getElementById(`btn-upload-${key}`).disabled=false;
 }
+
+function parseCSV(text){
+  // Normalize line endings
+  const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l=>l.trim());
+  const result=[];
+  for(const line of lines){
+    const cols=[];
+    let cur='',inQ=false;
+    for(let i=0;i<line.length;i++){
+      const c=line[i];
+      if(c==='"'){inQ=!inQ;}
+      else if(c===','&&!inQ){cols.push(cur.trim());cur='';}
+      else{cur+=c;}
+    }
+    cols.push(cur.trim());
+    result.push(cols);
+  }
+  return result;
+}
+
+function parseNum(s){
+  if(!s)return 0;
+  // Handle Brazilian format: 1.395,00 -> 1395.00
+  return parseFloat(s.replace(/\./g,'').replace(',','.').replace(/[^0-9.-]/g,''))||0;
+}
+
 function processUpload(type){
   const f=selFiles[type];if(!f)return;
-  const el=document.getElementById(`status-${type==='base'?'base':'month'}`);
-  el.className='upload-status ok';
-  el.textContent=type==='base'
-    ?`✓ Relatório base "${f.name}" carregado! ${estudantesBase.length} alunos.`
-    :`✓ Relatório mensal "${f.name}" processado. ${devedores.length} alunos em aberto.`;
+  const key=type==='base'?'base':'month';
+  const btn=document.getElementById(`btn-upload-${key}`);
+  const el=document.getElementById(`status-${key}`);
+  btn.disabled=true;btn.textContent='Processando...';
+
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const text=e.target.result;
+      const rows=parseCSV(text);
+      // Find header row (has "Matrícula" or "Matricula")
+      let headerIdx=rows.findIndex(r=>r[0]&&(r[0].toLowerCase().includes('matr')));
+      if(headerIdx===-1)headerIdx=0;
+      const dataRows=rows.slice(headerIdx+1).filter(r=>r[0]&&/^\d{5,}$/.test(r[0].trim()));
+
+      if(type==='base'){
+        // Replace base students
+        estudantesBase=dataRows.map(r=>({
+          matricula:r[0].trim(),
+          nome:r[1]?r[1].trim():'',
+          curso:r[2]?r[2].trim():'',
+          periodo:r[3]?r[3].trim():'',
+          turma:r[4]?r[4].trim():'',
+          parcela:r[6]?r[6].trim():'',
+          limite:r[7]?r[7].trim():'',
+          valor:parseNum(r[8]),
+          desc:parseNum(r[9]),
+          acresc:parseNum(r[10]),
+          apagar:parseNum(r[11])
+        }));
+        // Remove duplicates by matricula (keep last)
+        const seen={};
+        estudantesBase=estudantesBase.filter(e=>{
+          if(seen[e.matricula])return false;
+          seen[e.matricula]=true;return true;
+        });
+        el.className='upload-status ok';
+        el.textContent=`✓ Relatório base carregado! ${estudantesBase.length} alunos cadastrados.`;
+      } else {
+        // Monthly: these are the debtors
+        const mats=dataRows.map(r=>r[0].trim()).filter(Boolean);
+        // Remove duplicates
+        devedores=[...new Set(mats)];
+        el.className='upload-status ok';
+        el.textContent=`✓ Relatório mensal carregado! ${devedores.length} alunos em aberto.`;
+      }
+      // Refresh dashboard if active
+      if(currentTab==='dashboard'){showTab('dashboard');}
+      else if(currentTab==='alunos'){showTab('alunos');}
+    }catch(err){
+      el.className='upload-status err';
+      el.textContent='Erro ao processar o arquivo. Verifique o formato CSV.';
+      console.error(err);
+    }
+    btn.disabled=false;btn.textContent=type==='base'?'Processar Relatório Base':'Processar Relatório Mensal';
+  };
+  reader.readAsText(f,'latin-1');
 }
 
 // ============================================================
