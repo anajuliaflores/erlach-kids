@@ -523,7 +523,9 @@ function initChart(){
 
 function toggleEditSaldo(){
   const row=document.getElementById('saldo-edit-row');
-  row.style.display=row.style.display==='flex'?'none':'flex';
+  const isOpen=row.style.display==='flex'||row.style.display==='block';
+  row.style.display=isOpen?'none':'flex';
+  row.style.flexDirection='column';
 }
 async function salvarSaldo(){
   const val=parseFloat(document.getElementById('saldo-input').value);
@@ -802,7 +804,17 @@ async function processUpload(type){
           acresc:gn(r,'acresc',14),
           apagar:gn(r,'apagar',15)
         }));
-        // Keep all rows (same matricula can have different parcelas)
+        // Remove duplicates by nome (keep first occurrence)
+        const seenNomes={};
+        estudantesBase=estudantesBase.filter(e=>{
+          const nomeKey=e.nome.toLowerCase().trim();
+          if(seenNomes[nomeKey])return false;
+          seenNomes[nomeKey]=true;return true;
+        });
+        // Auto-calculate deve entrar from sum of apagar
+        const somaApagar=estudantesBase.reduce((s,e)=>s+e.apagar,0);
+        deveEntrar=somaApagar;
+        await sb.from('configuracoes').upsert({chave:'deve_entrar',valor:String(somaApagar)});
         // Save to Supabase
         el.className='upload-status ok';
         el.textContent=`✓ Salvando ${estudantesBase.length} alunos no banco...`;
