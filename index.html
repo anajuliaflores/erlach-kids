@@ -351,12 +351,14 @@ async function initApp(){
   document.getElementById('main-content').innerHTML='<div class="empty-state"><p style="font-size:1rem;font-weight:600">Carregando...</p></div>';
   // Load all data from DB in parallel
   try{
-    const [cfgRes, alunosRes, devedoresRes] = await Promise.all([
+    const [cfgRes, cfgMesRes, alunosRes, devedoresRes] = await Promise.all([
       sb.from('configuracoes').select('valor').eq('chave','deve_entrar').single(),
+      sb.from('configuracoes').select('valor').eq('chave','deve_entrar_mes').single(),
       sb.from('alunos').select('*').eq('tipo','base').order('nome'),
       sb.from('devedores_mes').select('*').order('created_at',{ascending:false}).limit(1000)
     ]);
     if(cfgRes.data) deveEntrar=parseFloat(cfgRes.data.valor)||0;
+    if(cfgMesRes.data) deveEntrarMes=cfgMesRes.data.valor||'';
     if(alunosRes.data && alunosRes.data.length){
       estudantesBase=alunosRes.data.map(r=>({
         matricula:r.matricula,nome:r.nome,curso:r.curso||'',
@@ -435,16 +437,30 @@ function renderDashboard(){
 
   // Deve Entrar — visível para ambos, editável só admin
   const deVal=deveEntrar>0?`R$ ${fmt(deveEntrar)}`:'Não definido';
+  const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const anoAtual=new Date().getFullYear();
+  const mesAtualIdx=new Date().getMonth();
+  let mesOpts='';
+  for(let a=anoAtual;a<=anoAtual+1;a++){
+    meses.forEach((m,i)=>{
+      const val=`${m} / ${a}`;
+      const sel=deveEntrarMes===val?'selected':'';
+      mesOpts+=`<option value="${val}" ${sel}>${val}</option>`;
+    });
+  }
   h+=`<div class="deve-entrar-card">
     <div class="de-top">
-      <span>Deve Entrar (mês)</span>
+      <span>Deve Entrar</span>
       ${isAdmin?`<button class="btn-edit-saldo" onclick="toggleEditSaldo()">✏ Editar</button>`:''}
     </div>
     <div class="de-valor" id="saldo-display">${deVal}</div>
-    <div class="de-sub">Valor esperado para Junho/2026</div>
-    ${isAdmin?`<div class="saldo-edit-row" id="saldo-edit-row">
-      <input type="number" id="saldo-input" placeholder="Valor esperado..." value="${deveEntrar||''}">
-      <button class="btn-salvar-saldo" onclick="salvarSaldo()">Salvar</button>
+    <div class="de-sub">${deveEntrarMes?'Valor esperado para '+deveEntrarMes:'Mês não definido'}</div>
+    ${isAdmin?`<div class="saldo-edit-row" id="saldo-edit-row" style="flex-direction:column;gap:8px">
+      <select id="saldo-mes" style="width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.55rem 0.8rem;font-size:0.92rem;font-family:var(--font)">${mesOpts}</select>
+      <div style="display:flex;gap:8px">
+        <input type="number" id="saldo-input" placeholder="Valor esperado..." value="${deveEntrar||''}" style="flex:1;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.55rem 0.8rem;font-size:0.92rem;font-family:var(--font)">
+        <button class="btn-salvar-saldo" onclick="salvarSaldo()">Salvar</button>
+      </div>
     </div>`:''}
   </div>`;
 
@@ -511,10 +527,14 @@ function toggleEditSaldo(){
 }
 async function salvarSaldo(){
   const val=parseFloat(document.getElementById('saldo-input').value);
+  const mes=document.getElementById('saldo-mes').value;
   if(!isNaN(val)&&val>=0){
     deveEntrar=val;
+    deveEntrarMes=mes;
     document.getElementById('saldo-display').textContent=`R$ ${fmt(val)}`;
     await sb.from('configuracoes').upsert({chave:'deve_entrar',valor:String(val)});
+    await sb.from('configuracoes').upsert({chave:'deve_entrar_mes',valor:mes});
+    showTab('dashboard');
   }
   document.getElementById('saldo-edit-row').style.display='none';
 }
