@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -294,12 +295,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
 <script>
 // ============================================================
-// DADOS
+// SUPABASE CONFIG
 // ============================================================
-const USERS = {
-  'admin':         { password:'erlach@110919', role:'admin',  displayName:'Admin',   mustChange:false },
-  'dheyner.erlach':{ password:'erlach@2026',   role:'gestor', displayName:'Dheyner', mustChange:true  }
-};
+const SUPABASE_URL = 'https://znwkilfyoetxirtsnovw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpud2tpbGZ5b2V0eGlydHNub3Z3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1OTc1MjQsImV4cCI6MjA5ODE3MzUyNH0.1syI3t6tQExcPcWYpgGcz_cqT49dVXaQw_RSalwjTr4';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let estudantesBase = [
   {matricula:'200250',nome:'Alice Ferreira Gegenheimer',curso:'EF',periodo:'M2',turma:'A',parcela:'6/12',limite:'05/06/2026',valor:2205,desc:0,acresc:0,apagar:2205,whatsapp:''},
@@ -335,27 +335,44 @@ let pizzaChart = null;
 // ============================================================
 // AUTH
 // ============================================================
-function doLogin(){
+async function doLogin(){
   const user = document.getElementById('login-user').value.trim().toLowerCase();
   const pass = document.getElementById('login-pass').value;
   const err  = document.getElementById('login-error');
-  if(USERS[user] && USERS[user].password===pass){
-    currentUser={username:user,...USERS[user]};
-    err.style.display='none';
-    document.getElementById('login-screen').classList.remove('active');
-    document.getElementById('app-screen').classList.add('active');
-    initApp();
-  } else {
+  const btn  = document.querySelector('#login-screen .btn-primary');
+  btn.textContent = 'Entrando...';
+  btn.disabled = true;
+  try {
+    const {data,error} = await sb.from('usuarios').select('*').eq('username',user).eq('password',pass).single();
+    if(error||!data){
+      err.style.display='block';
+      err.textContent='Usuário ou senha incorretos.';
+    } else {
+      currentUser={username:data.username,role:data.role,displayName:data.display_name,mustChange:data.must_change};
+      err.style.display='none';
+      document.getElementById('login-screen').classList.remove('active');
+      document.getElementById('app-screen').classList.add('active');
+      initApp();
+    }
+  } catch(e){
     err.style.display='block';
+    err.textContent='Erro de conexão. Tente novamente.';
   }
+  btn.textContent='Entrar';
+  btn.disabled=false;
 }
 document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 document.getElementById('login-user').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('login-pass').focus();});
 
-function initApp(){
+async function initApp(){
   document.getElementById('user-avatar').textContent=currentUser.displayName[0].toUpperCase();
   document.getElementById('topbar-role').textContent=roleLabel(currentUser.role);
   if(currentUser.role==='admin') document.querySelector('.admin-only').style.display='';
+  // Load deve_entrar from DB
+  try{
+    const {data}=await sb.from('configuracoes').select('valor').eq('chave','deve_entrar').single();
+    if(data) deveEntrar=parseFloat(data.valor)||0;
+  }catch(e){}
   showTab('dashboard');
 }
 function roleLabel(r){return r==='admin'?'Administrador':'Gestão';}
@@ -472,11 +489,12 @@ function toggleEditSaldo(){
   const row=document.getElementById('saldo-edit-row');
   row.style.display=row.style.display==='flex'?'none':'flex';
 }
-function salvarSaldo(){
+async function salvarSaldo(){
   const val=parseFloat(document.getElementById('saldo-input').value);
   if(!isNaN(val)&&val>=0){
     deveEntrar=val;
     document.getElementById('saldo-display').textContent=`R$ ${fmt(val)}`;
+    await sb.from('configuracoes').upsert({chave:'deve_entrar',valor:String(val)});
   }
   document.getElementById('saldo-edit-row').style.display='none';
 }
@@ -579,6 +597,22 @@ function openDetail(matricula){
   document.getElementById('detail-content').innerHTML=h;
   document.getElementById('app-screen').classList.remove('active');
   document.getElementById('detail-screen').classList.add('active');
+  // Load notes from DB
+  loadNotes(matricula);
+}
+
+async function loadNotes(matricula){
+  try{
+    const {data}=await sb.from('anotacoes').select('*').eq('matricula',matricula).order('created_at',{ascending:true});
+    if(data&&data.length){
+      anotacoes[matricula]=data.map(n=>({user:n.usuario,date:new Date(n.created_at).toLocaleDateString('pt-BR')+' '+new Date(n.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),text:n.texto}));
+      const list=document.getElementById('notes-list');
+      if(list){
+        const notas=anotacoes[matricula].slice().reverse();
+        list.innerHTML=notas.map(n=>`<div class="note-item"><div class="note-meta"><strong>${n.user}</strong><span>${n.date}</span></div><div class="note-text">${n.text}</div></div>`).join('');
+      }
+    }
+  }catch(e){console.error(e);}
 }
 
 function closeDetail(){
@@ -586,17 +620,25 @@ function closeDetail(){
   document.getElementById('app-screen').classList.add('active');
 }
 
-function addNote(matricula){
+async function addNote(matricula){
   const input=document.getElementById('note-input');
   const text=input.value.trim();
   if(!text)return;
-  if(!anotacoes[matricula])anotacoes[matricula]=[];
-  const now=new Date();
-  const date=now.toLocaleDateString('pt-BR')+' '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-  anotacoes[matricula].push({user:currentUser.displayName,date,text});
-  input.value='';
-  const notas=anotacoes[matricula].slice().reverse();
-  document.getElementById('notes-list').innerHTML=notas.map(n=>`<div class="note-item"><div class="note-meta"><strong>${n.user}</strong><span>${n.date}</span></div><div class="note-text">${n.text}</div></div>`).join('');
+  const btn=document.querySelector('.btn-add-note');
+  btn.textContent='...';btn.disabled=true;
+  try{
+    const {data,error}=await sb.from('anotacoes').insert({matricula,texto:text,usuario:currentUser.displayName}).select();
+    if(!error){
+      if(!anotacoes[matricula])anotacoes[matricula]=[];
+      const now=new Date();
+      const date=now.toLocaleDateString('pt-BR')+' '+now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      anotacoes[matricula].push({user:currentUser.displayName,date,text});
+      input.value='';
+      const notas=anotacoes[matricula].slice().reverse();
+      document.getElementById('notes-list').innerHTML=notas.map(n=>`<div class="note-item"><div class="note-meta"><strong>${n.user}</strong><span>${n.date}</span></div><div class="note-text">${n.text}</div></div>`).join('');
+    }
+  }catch(e){console.error(e);}
+  btn.textContent='Salvar';btn.disabled=false;
 }
 
 // ============================================================
@@ -667,20 +709,22 @@ function renderPerfil(){
 
 function openModal(){document.getElementById('modal-pwd').classList.add('open');}
 function closeModal(){document.getElementById('modal-pwd').classList.remove('open');}
-function saveNewPassword(){
+async function saveNewPassword(){
   const p1=document.getElementById('new-pwd1').value;
   const p2=document.getElementById('new-pwd2').value;
   const err=document.getElementById('pwd-error');
   if(p1.length<6){err.style.display='block';err.textContent='Senha deve ter ao menos 6 caracteres.';return;}
   if(p1!==p2){err.style.display='block';err.textContent='As senhas não coincidem.';return;}
-  USERS[currentUser.username].password=p1;
-  USERS[currentUser.username].mustChange=false;
-  err.style.display='none';
-  closeModal();
-  document.getElementById('new-pwd1').value='';
-  document.getElementById('new-pwd2').value='';
-  showTab('perfil');
-  alert('Senha alterada com sucesso!');
+  try{
+    await sb.from('usuarios').update({password:p1,must_change:false}).eq('username',currentUser.username);
+    currentUser.mustChange=false;
+    err.style.display='none';
+    closeModal();
+    document.getElementById('new-pwd1').value='';
+    document.getElementById('new-pwd2').value='';
+    showTab('perfil');
+    alert('Senha alterada com sucesso!');
+  }catch(e){err.style.display='block';err.textContent='Erro ao salvar. Tente novamente.';}
 }
 
 // SERVICE WORKER
