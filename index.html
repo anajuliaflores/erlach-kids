@@ -721,19 +721,38 @@ function processUpload(type){
       const dataRows=rows.slice(headerIdx+1).filter(r=>r[0]&&/^\d{5,}$/.test(r[0].trim()));
 
       if(type==='base'){
-        // Replace base students
+        // Auto-detect column positions from header
+        const headerRow=rows[headerIdx];
+        const colIdx={};
+        headerRow.forEach((h,i)=>{
+          const hn=h.toLowerCase().trim().replace(/[^a-záéíóúàâêôãõçü]/gi,'');
+          if(hn.includes('matr'))colIdx.matricula=i;
+          else if(hn.includes('nome'))colIdx.nome=i;
+          else if(hn.includes('cur'))colIdx.curso=i;
+          else if(hn.includes('per'))colIdx.periodo=i;
+          else if(hn.includes('tur'))colIdx.turma=i;
+          else if(hn.includes('parc'))colIdx.parcela=i;
+          else if(hn.includes('lim'))colIdx.limite=i;
+          else if(hn.includes('valor'))colIdx.valor=i;
+          else if(hn.includes('desc'))colIdx.desc=i;
+          else if(hn.includes('acr'))colIdx.acresc=i;
+          else if(hn.includes('pag'))colIdx.apagar=i;
+        });
+        // Fallback to known positions if auto-detect fails
+        const g=(r,k,fb)=>{const i=colIdx[k]!==undefined?colIdx[k]:fb;return r[i]?r[i].trim():'';};
+        const gn=(r,k,fb)=>parseNum(g(r,k,fb));
         estudantesBase=dataRows.map(r=>({
-          matricula:r[0].trim(),
-          nome:r[1]?r[1].trim():'',
-          curso:r[2]?r[2].trim():'',
-          periodo:r[3]?r[3].trim():'',
-          turma:r[4]?r[4].trim():'',
-          parcela:r[6]?r[6].trim():'',
-          limite:r[7]?r[7].trim():'',
-          valor:parseNum(r[8]),
-          desc:parseNum(r[9]),
-          acresc:parseNum(r[10]),
-          apagar:parseNum(r[11])
+          matricula:g(r,'matricula',0),
+          nome:g(r,'nome',2),
+          curso:g(r,'curso',3),
+          periodo:g(r,'periodo',4),
+          turma:g(r,'turma',6),
+          parcela:g(r,'parcela',8),
+          limite:g(r,'limite',9),
+          valor:gn(r,'valor',11),
+          desc:gn(r,'desc',13),
+          acresc:gn(r,'acresc',14),
+          apagar:gn(r,'apagar',15)
         }));
         // Remove duplicates by matricula (keep last)
         const seen={};
