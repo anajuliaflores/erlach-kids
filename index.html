@@ -347,11 +347,34 @@ async function initApp(){
   document.getElementById('user-avatar').textContent=currentUser.displayName[0].toUpperCase();
   document.getElementById('topbar-role').textContent=roleLabel(currentUser.role);
   if(currentUser.role==='admin') document.querySelector('.admin-only').style.display='';
-  // Load deve_entrar from DB
+  // Show loading
+  document.getElementById('main-content').innerHTML='<div class="empty-state"><p>Carregando dados...</p></div>';
+  document.getElementById('app-screen').classList.add('active');
+  // Load all data from DB in parallel
   try{
-    const {data}=await sb.from('configuracoes').select('valor').eq('chave','deve_entrar').single();
-    if(data) deveEntrar=parseFloat(data.valor)||0;
-  }catch(e){}
+    const [cfgRes, alunosRes, devedoresRes] = await Promise.all([
+      sb.from('configuracoes').select('valor').eq('chave','deve_entrar').single(),
+      sb.from('alunos').select('*').eq('tipo','base').order('nome'),
+      sb.from('devedores_mes').select('*').order('created_at',{ascending:false}).limit(1000)
+    ]);
+    if(cfgRes.data) deveEntrar=parseFloat(cfgRes.data.valor)||0;
+    if(alunosRes.data && alunosRes.data.length){
+      estudantesBase=alunosRes.data.map(r=>({
+        matricula:r.matricula,nome:r.nome,curso:r.curso||'',
+        periodo:r.periodo||'',turma:r.turma||'',parcela:r.parcela||'',
+        limite:r.limite||'',valor:r.valor||0,desc:r.desc_val||0,
+        acresc:r.acresc||0,apagar:r.apagar||0
+      }));
+    }
+    if(devedoresRes.data && devedoresRes.data.length){
+      // Get latest mes_referencia
+      const latestMes=devedoresRes.data[0].mes_referencia;
+      if(latestMes) mesReferencia=latestMes;
+      // Get devedores for that month
+      const mesData=devedoresRes.data.filter(d=>d.mes_referencia===latestMes);
+      devedores=[...new Set(mesData.map(d=>d.matricula))];
+    }
+  }catch(e){console.error('Error loading data:',e);}
   showTab('dashboard');
 }
 function roleLabel(r){return r==='admin'?'Administrador':'Gestão';}
@@ -760,8 +783,26 @@ function processUpload(type){
           if(seen[e.matricula])return false;
           seen[e.matricula]=true;return true;
         });
+        // Save to Supabase
         el.className='upload-status ok';
-        el.textContent=`✓ Relatório base carregado! ${estudantesBase.length} alunos cadastrados.`;
+        el.textContent=`✓ Salvando ${estudantesBase.length} alunos no banco...`;
+        try{
+          // Delete old base and insert new
+          await sb.from('alunos').delete().eq('tipo','base');
+          const chunks=[];
+          for(let i=0;i<estudantesBase.length;i+=50) chunks.push(estudantesBase.slice(i,i+50));
+          for(const chunk of chunks){
+            await sb.from('alunos').insert(chunk.map(e=>({
+              matricula:e.matricula,nome:e.nome,curso:e.curso,periodo:e.periodo,
+              turma:e.turma,parcela:e.parcela,limite:e.limite,valor:e.valor,
+              desc_val:e.desc,acresc:e.acresc,apagar:e.apagar,tipo:'base'
+            })));
+          }
+          el.textContent=`✓ Relatório base salvo! ${estudantesBase.length} alunos cadastrados.`;
+        }catch(err){
+          console.error(err);
+          el.textContent=`✓ Carregado localmente (${estudantesBase.length} alunos). Erro ao salvar no banco.`;
+        }
       } else {
         // Monthly: these are the debtors
         const mats=dataRows.map(r=>r[0].trim()).filter(Boolean);
@@ -773,8 +814,22 @@ function processUpload(type){
           const m=line.match(/(Janeiro|Fevereiro|Março|Abril|Maio|Junho|Julho|Agosto|Setembro|Outubro|Novembro|Dezembro)[/\s]*(\d{4})/i);
           if(m){mesReferencia=`${m[1].charAt(0).toUpperCase()+m[1].slice(1)} / ${m[2]}`;break;}
         }
+        // Save devedores to Supabase
         el.className='upload-status ok';
-        el.textContent=`✓ Relatório mensal carregado! ${devedores.length} alunos em aberto${mesReferencia?' ('+mesReferencia+')':''}.`;
+        el.textContent=`✓ Salvando relatório mensal no banco...`;
+        try{
+          // Delete old devedores for this month and insert new
+          if(mesReferencia) await sb.from('devedores_mes').delete().eq('mes_referencia',mesReferencia);
+          if(devedores.length){
+            await sb.from('devedores_mes').insert(devedores.map(m=>({
+              matricula:m, mes_referencia:mesReferencia||''
+            })));
+          }
+          el.textContent=`✓ Relatório mensal salvo! ${devedores.length} alunos em aberto${mesReferencia?' ('+mesReferencia+')':''}.`;
+        }catch(err){
+          console.error(err);
+          el.textContent=`✓ Carregado localmente. Erro ao salvar no banco.`;
+        }
       }
       // Refresh dashboard if active
       if(currentTab==='dashboard'){showTab('dashboard');}
