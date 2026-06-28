@@ -702,10 +702,10 @@ function handleFile(type,input){
 }
 
 function parseCSV(text){
-  // Normalize line endings
-  const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l=>l.trim());
+  const lines=text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n');
   const result=[];
   for(const line of lines){
+    if(!line.trim())continue;
     const cols=[];
     let cur='',inQ=false;
     for(let i=0;i<line.length;i++){
@@ -721,10 +721,15 @@ function parseCSV(text){
 }
 
 function parseNum(s){
-  if(!s)return 0;
-  // Handle Brazilian format: 1.395,00 -> 1395.00
-  return parseFloat(s.replace(/\./g,'').replace(',','.').replace(/[^0-9.-]/g,''))||0;
+  if(!s||s==='-')return 0;
+  s=s.replace(/"/g,'').trim();
+  // Brazilian format: 1.395,00
+  if(/\d\.\d{3},\d{2}/.test(s)) s=s.replace(/\./g,'').replace(',','.');
+  else if(s.includes(',')&&!s.includes('.')) s=s.replace(',','.');
+  return parseFloat(s.replace(/[^0-9.-]/g,''))||0;
 }
+
+function joinBrokenCols(rows){return rows;}
 
 function processUpload(type){
   const f=selFiles[type];if(!f)return;
@@ -742,10 +747,11 @@ function processUpload(type){
       let headerIdx=rows.findIndex(r=>r[0]&&(r[0].toLowerCase().includes('matr')));
       if(headerIdx===-1)headerIdx=0;
       const dataRows=rows.slice(headerIdx+1).filter(r=>r[0]&&/^\d{5,}$/.test(r[0].trim()));
+      const headerRow2=rows[headerIdx];
 
       if(type==='base'){
         // Auto-detect column positions from header
-        const headerRow=rows[headerIdx];
+        const headerRow=headerRow2||rows[headerIdx];
         const colIdx={};
         headerRow.forEach((h,i)=>{
           const hn=h.toLowerCase().trim().replace(/[^a-záéíóúàâêôãõçü]/gi,'');
