@@ -352,8 +352,8 @@ async function initApp(){
   // Load all data from DB in parallel
   try{
     const [cfgRes, cfgMesRes, alunosRes, devedoresRes] = await Promise.all([
-      sb.from('configuracoes').select('valor').eq('chave','deve_entrar').single(),
-      sb.from('configuracoes').select('valor').eq('chave','deve_entrar_mes').single(),
+      sb.from('configuracoes').select('valor').eq('chave','deve_entrar').maybeSingle(),
+      sb.from('configuracoes').select('valor').eq('chave','deve_entrar_mes').maybeSingle(),
       sb.from('alunos').select('*').eq('tipo','base').order('nome'),
       sb.from('devedores_mes').select('*').order('created_at',{ascending:false}).limit(1000)
     ]);
