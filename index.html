@@ -731,7 +731,7 @@ function parseNum(s){
 
 function joinBrokenCols(rows){return rows;}
 
-function processUpload(type){
+async function processUpload(type){
   const f=selFiles[type];if(!f)return;
   const key=type==='base'?'base':'month';
   const btn=document.getElementById(`btn-upload-${key}`);
