@@ -444,34 +444,34 @@ function renderDashboard(){
     <div class="stat-card sc-green"><div class="s-label">Adimplência</div><div class="s-value">${pct}%</div><div class="s-sub">pagaram</div></div>
   </div>`;
 
-  // Deve Entrar — visível para ambos, editável só admin
-  const deVal=deveEntrar>0?`R$ ${fmt(deveEntrar)}`:'Não definido';
-  const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  // Deve Entrar
+  const deVal=deveEntrar>0?'R$ '+fmt(deveEntrar):'Não definido';
+  const mesesLista=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const anoAtual=new Date().getFullYear();
-  const mesAtualIdx=new Date().getMonth();
   let mesOpts='';
   for(let a=anoAtual;a<=anoAtual+1;a++){
-    meses.forEach((m,i)=>{
-      const val=`${m} / ${a}`;
-      const sel=deveEntrarMes===val?'selected':'';
-      mesOpts+=`<option value="${val}" ${sel}>${val}</option>`;
+    mesesLista.forEach(function(m){
+      const val=m+' / '+a;
+      const sel=deveEntrarMes===val?' selected':'';
+      mesOpts+='<option value="'+val+'"'+sel+'>'+val+'</option>';
     });
   }
-  h+=`<div class="deve-entrar-card">
-    <div class="de-top">
-      <span>Deve Entrar</span>
-      ${isAdmin?`<button class="btn-edit-saldo" onclick="toggleEditSaldo()">✏ Editar</button>`:''}
-    </div>
-    <div class="de-valor" id="saldo-display">${deVal}</div>
-    <div class="de-sub">${deveEntrarMes?'Valor esperado para '+deveEntrarMes:'Mês não definido'}</div>
-    ${isAdmin?`<div class="saldo-edit-row" id="saldo-edit-row" style="flex-direction:column;gap:8px">
-      <select id="saldo-mes" style="width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.55rem 0.8rem;font-size:0.92rem;font-family:var(--font)">${mesOpts}</select>
-      <div style="display:flex;gap:8px">
-        <input type="number" id="saldo-input" placeholder="Valor esperado..." value="${deveEntrar||''}" style="flex:1;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.55rem 0.8rem;font-size:0.92rem;font-family:var(--font)">
-        <button class="btn-salvar-saldo" onclick="salvarSaldo()">Salvar</button>
-      </div>
-    </div>`:''}
-  </div>`;
+  let deveEntrarHtml='<div class="deve-entrar-card">';
+  deveEntrarHtml+='<div class="de-top"><span>Deve Entrar</span>';
+  if(isAdmin) deveEntrarHtml+='<button class="btn-edit-saldo" onclick="toggleEditSaldo()">✏ Editar</button>';
+  deveEntrarHtml+='</div>';
+  deveEntrarHtml+='<div class="de-valor" id="saldo-display">'+deVal+'</div>';
+  deveEntrarHtml+='<div class="de-sub">'+(deveEntrarMes?'Valor esperado para '+deveEntrarMes:'Mês não definido')+'</div>';
+  if(isAdmin){
+    deveEntrarHtml+='<div class="saldo-edit-row" id="saldo-edit-row" style="flex-direction:column;gap:8px">';
+    deveEntrarHtml+='<select id="saldo-mes" style="width:100%;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.55rem 0.8rem;font-size:0.92rem;font-family:var(--font)">'+mesOpts+'</select>';
+    deveEntrarHtml+='<div style="display:flex;gap:8px">';
+    deveEntrarHtml+='<input type="number" id="saldo-input" placeholder="Valor esperado..." value="'+(deveEntrar||'')+'" style="flex:1;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0.55rem 0.8rem;font-size:0.92rem;font-family:var(--font)">';
+    deveEntrarHtml+='<button class="btn-salvar-saldo" onclick="salvarSaldo()">Salvar</button>';
+    deveEntrarHtml+='</div></div>';
+  }
+  deveEntrarHtml+='</div>';
+  h+=deveEntrarHtml;
 
   // Gráfico
   h+=`<div class="chart-card">
