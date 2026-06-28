@@ -395,17 +395,23 @@ function doLogout(){
 // TABS
 // ============================================================
 function showTab(tab){
+  currentTab=tab;
   document.querySelectorAll('.nav-tab').forEach(t=>{
     const map={'Dashboard':'dashboard','Alunos':'alunos','Admin':'admin','Perfil':'perfil'};
     t.classList.toggle('active',map[t.textContent]===tab);
   });
   if(pizzaChart&&tab!=='dashboard'){pizzaChart.destroy();pizzaChart=null;}
   const c=document.getElementById('main-content');
-  if(tab==='dashboard')     c.innerHTML=renderDashboard();
-  else if(tab==='alunos')   c.innerHTML=renderAlunos();
-  else if(tab==='admin')    c.innerHTML=renderAdmin();
-  else if(tab==='perfil')   c.innerHTML=renderPerfil();
-  if(tab==='dashboard') initChart();
+  try{
+    if(tab==='dashboard')     c.innerHTML=renderDashboard();
+    else if(tab==='alunos')   c.innerHTML=renderAlunos();
+    else if(tab==='admin')    c.innerHTML=renderAdmin();
+    else if(tab==='perfil')   c.innerHTML=renderPerfil();
+    if(tab==='dashboard') initChart();
+  }catch(err){
+    console.error('Erro na aba '+tab+':',err);
+    c.innerHTML='<div class="empty-state"><p>Erro ao carregar. Tente novamente.</p></div>';
+  }
 }
 
 // ============================================================
@@ -883,7 +889,7 @@ async function processUpload(type){
 // PERFIL
 // ============================================================
 function renderPerfil(){
-  const mc=USERS[currentUser.username].mustChange;
+  const mc=currentUser.mustChange;
   let h='';
   if(mc)h+=`<div class="change-pwd-banner"><p>⚠ Troque sua senha no primeiro acesso.</p><button class="btn-change-pwd" onclick="openModal()">Trocar agora</button></div>`;
   h+=`<div class="info-card"><h3>Meu perfil</h3>
