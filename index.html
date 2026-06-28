@@ -347,9 +347,8 @@ async function initApp(){
   document.getElementById('user-avatar').textContent=currentUser.displayName[0].toUpperCase();
   document.getElementById('topbar-role').textContent=roleLabel(currentUser.role);
   if(currentUser.role==='admin') document.querySelector('.admin-only').style.display='';
-  // Show loading
-  document.getElementById('main-content').innerHTML='<div class="empty-state"><p>Carregando dados...</p></div>';
-  document.getElementById('app-screen').classList.add('active');
+  // Show loading state
+  document.getElementById('main-content').innerHTML='<div class="empty-state"><p style="font-size:1rem;font-weight:600">Carregando...</p></div>';
   // Load all data from DB in parallel
   try{
     const [cfgRes, alunosRes, devedoresRes] = await Promise.all([
@@ -783,12 +782,7 @@ async function processUpload(type){
           acresc:gn(r,'acresc',14),
           apagar:gn(r,'apagar',15)
         }));
-        // Remove duplicates by matricula (keep last)
-        const seen={};
-        estudantesBase=estudantesBase.filter(e=>{
-          if(seen[e.matricula])return false;
-          seen[e.matricula]=true;return true;
-        });
+        // Keep all rows (same matricula can have different parcelas)
         // Save to Supabase
         el.className='upload-status ok';
         el.textContent=`✓ Salvando ${estudantesBase.length} alunos no banco...`;
@@ -847,7 +841,7 @@ async function processUpload(type){
     }
     btn.disabled=false;btn.textContent=type==='base'?'Processar Relatório Base':'Processar Relatório Mensal';
   };
-  reader.readAsText(f,'latin-1');
+  reader.readAsText(f,'windows-1252');
 }
 
 // ============================================================
