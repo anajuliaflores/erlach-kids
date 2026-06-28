@@ -375,7 +375,10 @@ async function initApp(){
       const mesData=devedoresRes.data.filter(d=>d.mes_referencia===latestMes);
       devedores=[...new Set(mesData.map(d=>d.matricula))];
     }
-  }catch(e){console.error('Error loading data:',e);}
+  }catch(e){
+    console.error('Error loading data:',e);
+  }
+  // Always show dashboard even if DB fails
   showTab('dashboard');
 }
 function roleLabel(r){return r==='admin'?'Administrador':'Gestão';}
