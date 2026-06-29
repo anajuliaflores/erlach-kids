@@ -219,6 +219,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .change-pwd-banner p{font-size:0.82rem;color:var(--gold)}
 .btn-change-pwd{background:var(--gold);color:#fff;border:none;border-radius:6px;padding:5px 12px;font-size:0.78rem;font-family:var(--font);cursor:pointer;font-weight:700;white-space:nowrap}
 .empty-state{text-align:center;padding:2.5rem 1rem;color:var(--text3);font-size:0.9rem}
+.update-banner{position:fixed;bottom:1rem;left:1rem;right:1rem;background:var(--primary);background:var(--red);color:#fff;border-radius:var(--radius);padding:0.9rem 1.1rem;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:999;box-shadow:var(--shadow-md);animation:slideUp 0.3s ease}
+@keyframes slideUp{from{transform:translateY(100px);opacity:0}to{transform:translateY(0);opacity:1}}
+.update-banner p{font-size:0.85rem;font-weight:600}
+.btn-update{background:#fff;color:var(--red);border:none;border-radius:6px;padding:6px 14px;font-size:0.82rem;font-weight:700;cursor:pointer;font-family:var(--font);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -928,9 +932,42 @@ async function saveNewPassword(){
 }
 
 // SERVICE WORKER
+let swReg = null;
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});
+  window.addEventListener('load', async ()=>{
+    try{
+      swReg = await navigator.serviceWorker.register('sw.js');
+      // Check for updates every 30 seconds
+      setInterval(()=>{ swReg.update(); }, 30000);
+      // Listen for new service worker
+      swReg.addEventListener('updatefound', ()=>{
+        const newSW = swReg.installing;
+        newSW.addEventListener('statechange', ()=>{
+          if(newSW.state === 'installed' && navigator.serviceWorker.controller){
+            // New version available
+            document.getElementById('update-banner').style.display='flex';
+          }
+        });
+      });
+    }catch(e){}
+  });
+  // When controller changes, reload
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+    window.location.reload();
+  });
+}
+
+function applyUpdate(){
+  if(swReg && swReg.waiting){
+    swReg.waiting.postMessage({type:'SKIP_WAITING'});
+  }
+  document.getElementById('update-banner').style.display='none';
+  window.location.reload();
 }
 </script>
+<div id="update-banner" style="display:none" class="update-banner">
+  <p>🔄 Nova versão disponível!</p>
+  <button class="btn-update" onclick="applyUpdate()">Atualizar agora</button>
+</div>
 </body>
 </html>
