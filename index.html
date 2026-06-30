@@ -863,19 +863,19 @@ async function processUpload(type){
         }
         // Save devedores to Supabase
         el.className='upload-status ok';
-        el.textContent=`✓ Salvando relatório mensal no banco...`;
+        el.textContent='✓ Salvando relatório mensal no banco...';
         try{
-          // Delete old devedores for this month and insert new
-          if(mesReferencia) await sb.from('devedores_mes').delete().eq('mes_referencia',mesReferencia);
-          if(devedores.length){
+          // Always delete ALL existing devedores first, then insert new ones
+          await sb.from('devedores_mes').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+          if(devedores.length > 0){
             await sb.from('devedores_mes').insert(devedores.map(m=>({
               matricula:m, mes_referencia:mesReferencia||''
             })));
           }
-          el.textContent=`✓ Relatório mensal salvo! ${devedores.length} alunos em aberto${mesReferencia?' ('+mesReferencia+')':''}.`;
+          el.textContent='✓ Relatório mensal salvo! '+devedores.length+' alunos em aberto'+(mesReferencia?' ('+mesReferencia+')':'')+'.';
         }catch(err){
           console.error(err);
-          el.textContent=`✓ Carregado localmente. Erro ao salvar no banco.`;
+          el.textContent='✓ Carregado localmente. Erro ao salvar no banco.';
         }
       }
       // Refresh dashboard if active
